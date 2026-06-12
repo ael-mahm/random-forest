@@ -33,8 +33,7 @@ jobs:
         run: |
           copernicusmarine login \
             --username "$COPERNICUSMARINE_SERVICE_USERNAME" \
-            --password "$COPERNICUSMARINE_SERVICE_PASSWORD" \
-            --skip-if-user-logged-in
+            --password "$COPERNICUSMARINE_SERVICE_PASSWORD"
 
       # 5. Run the full pipeline
       - name: Run daily pipeline
