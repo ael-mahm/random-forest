@@ -22,6 +22,14 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Setup Copernicus credentials
+        run: |
+          mkdir -p ~/.copernicusmarine
+          printf '[credentials]\nusername=%s\npassword=%s\n' \
+            "${{ secrets.COPERNICUS_USERNAME }}" \
+            "${{ secrets.COPERNICUS_PASSWORD }}" \
+            > ~/.copernicusmarine/copernicusmarine.cfg
+
       - name: Run daily pipeline
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
