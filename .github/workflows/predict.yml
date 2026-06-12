@@ -2,7 +2,7 @@ name: Daily Fishing Prediction
 
 on:
   schedule:
-    - cron: "0 18 * * *" # Every day at 6:00 PM UTC
+    - cron: "0 1 * * *" # Every day at 6:00 PM UTC
   workflow_dispatch: # Manual run button (for testing)
 
 jobs:
