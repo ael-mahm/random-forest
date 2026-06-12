@@ -1,0 +1,46 @@
+name: Daily Fishing Prediction
+
+on:
+  schedule:
+    - cron: "0 18 * * *" # Every day at 3:00 AM UTC
+  workflow_dispatch: # Manual run button (for testing)
+
+jobs:
+  run-prediction:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Download your repo files
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Setup Python
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      # 3. Install all libraries
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      # 4. Login to Copernicus Marine (needed for ocean data download)
+      - name: Login to Copernicus Marine
+        env:
+          COPERNICUSMARINE_SERVICE_USERNAME: ${{ secrets.COPERNICUS_USERNAME }}
+          COPERNICUSMARINE_SERVICE_PASSWORD: ${{ secrets.COPERNICUS_PASSWORD }}
+        run: |
+          copernicusmarine login \
+            --username "$COPERNICUSMARINE_SERVICE_USERNAME" \
+            --password "$COPERNICUSMARINE_SERVICE_PASSWORD" \
+            --skip-if-user-logged-in
+
+      # 5. Run the full pipeline
+      - name: Run daily pipeline
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          COPERNICUSMARINE_SERVICE_USERNAME: ${{ secrets.COPERNICUS_USERNAME }}
+          COPERNICUSMARINE_SERVICE_PASSWORD: ${{ secrets.COPERNICUS_PASSWORD }}
+        run: python daily_pipeline.py

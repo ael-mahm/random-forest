@@ -1,0 +1,10 @@
+copernicusmarine
+xarray
+pandas
+numpy
+joblib
+scikit-learn
+supabase
+scipy
+netCDF4
+h5netcdf
