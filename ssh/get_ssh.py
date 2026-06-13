@@ -8,17 +8,18 @@ MAX_LON = -16.20
 MIN_LAT = 23.55
 MAX_LAT = 24.05
 
-TARGET_DATE = (datetime.utcnow() + timedelta(days=1)).strftime("%Y-%m-%d")
-
+TARGET_DATE = os.environ.get("PIPELINE_DATE") or (datetime.utcnow() + timedelta(days=1)).strftime("%Y-%m-%d")
 
 OUTPUT_DIR  = "./ocean_data"
 OUTPUT_FILE = "ssh_forecast_tomorrow.nc"
 
+# ✅ Read credentials from environment variables
+USERNAME = os.environ.get("COPERNICUSMARINE_SERVICE_USERNAME")
+PASSWORD = os.environ.get("COPERNICUSMARINE_SERVICE_PASSWORD")
 
 def fetch_ssh_forecast():
     print(f"Requesting SSH forecast data for {TARGET_DATE}...")
     os.makedirs(OUTPUT_DIR, exist_ok=True)
-
     file_path = os.path.join(OUTPUT_DIR, OUTPUT_FILE)
     if os.path.exists(file_path):
         os.remove(file_path)
@@ -26,7 +27,7 @@ def fetch_ssh_forecast():
 
     copernicusmarine.subset(
         dataset_id="cmems_mod_glo_phy_anfc_0.083deg_P1D-m",
-        variables=["zos"],          # zos = SSH (Sea Surface Height above geoid)
+        variables=["zos"],
         minimum_longitude=MIN_LON,
         maximum_longitude=MAX_LON,
         minimum_latitude=MIN_LAT,
@@ -35,27 +36,24 @@ def fetch_ssh_forecast():
         end_datetime=f"{TARGET_DATE} 23:59:59",
         output_filename=OUTPUT_FILE,
         output_directory=OUTPUT_DIR,
+        username=USERNAME,
+        password=PASSWORD,
     )
     print(f"Download complete! Saved to {OUTPUT_DIR}/{OUTPUT_FILE}")
-
 
 def read_and_preview_data():
     file_path = os.path.join(OUTPUT_DIR, OUTPUT_FILE)
     if not os.path.exists(file_path):
         print("File not found. Run fetch_ssh_forecast() first.")
         return
-
     print("\n--- Preprocessing SSH Data ---")
     ds  = xr.open_dataset(file_path)
     ssh = ds["zos"]
-
     print(ssh)
     print(f"\nMin SSH : {float(ssh.min()):.4f} m")
     print(f"Max SSH : {float(ssh.max()):.4f} m")
     print(f"Mean SSH: {float(ssh.mean()):.4f} m")
-
     ds.close()
-
 
 if __name__ == "__main__":
     fetch_ssh_forecast()
